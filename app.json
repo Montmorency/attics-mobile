@@ -1,20 +1,22 @@
 {
   "expo": {
-    "name": "ihp-backend-expo-starter",
-    "slug": "ihp-backend-expo-starter",
+    "name": "attics",
+    "slug": "atticsMobile",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "scheme":"app",
     "updates": {
+      "enabled": true,
       "fallbackToCacheTimeout": 0
     },
     "assetBundlePatterns": [
-      "**/*"
+      "assets/*"
     ],
     "ios": {
       "supportsTablet": true
@@ -23,7 +25,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+    "package": "com.attics.mobile"
     },
     "web": {
       "favicon": "./assets/favicon.png"
