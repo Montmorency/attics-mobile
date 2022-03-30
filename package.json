@@ -11,9 +11,13 @@
     "types": "npm install 'https://ihpbackend.digitallyinduced.com/ShowTypescriptDeclarationFile?typescriptDeclarationFileId=ccf12422-e15b-4db3-8e1b-5fbcfa1b7edc&accessToken=NRgQzHbuLEcnDELKjMgoahgagREsOTvi'"
   },
   "dependencies": {
+    "@react-navigation/bottom-tabs": "^6.2.0",
+    "@react-navigation/native": "^6.0.8",
+    "@react-navigation/native-stack": "^6.5.2",
     "@types/ihp-backend": "https://ihpbackend.digitallyinduced.com/ShowTypescriptDeclarationFile?typescriptDeclarationFileId=ccf12422-e15b-4db3-8e1b-5fbcfa1b7edc&accessToken=NRgQzHbuLEcnDELKjMgoahgagREsOTvi",
     "expo": "~44.0.0",
     "expo-auth-session": "^3.5.0",
+    "expo-av": "~10.2.0",
     "expo-camera": "~12.1.2",
     "expo-dev-client": "~0.8.4",
     "expo-location": "~14.0.1",
@@ -25,13 +29,15 @@
     "ihp-backend": "^0.3.5",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "react-native": "0.64.3",
+    "react-native": "~0.67.0",
+    "react-native-safe-area-context": "3.3.2",
+    "react-native-screens": "~3.10.1",
     "react-native-web": "0.17.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
     "@types/react": "~17.0.21",
-    "@types/react-native": "~0.64.12",
+    "@types/react-native": "~0.67.0",
     "typescript": "~4.3.5"
   },
   "private": true
