@@ -14,6 +14,8 @@
     "@react-navigation/bottom-tabs": "^6.2.0",
     "@react-navigation/native": "^6.0.8",
     "@react-navigation/native-stack": "^6.5.2",
+    "@rneui/base": "^4.0.0-rc.1",
+    "@rneui/themed": "^4.0.0-rc.1",
     "@types/ihp-backend": "https://ihpbackend.digitallyinduced.com/ShowTypescriptDeclarationFile?typescriptDeclarationFileId=ccf12422-e15b-4db3-8e1b-5fbcfa1b7edc&accessToken=NRgQzHbuLEcnDELKjMgoahgagREsOTvi",
     "expo": "~44.0.0",
     "expo-auth-session": "^3.5.0",

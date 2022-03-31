@@ -1,9 +1,9 @@
 import { StatusBar } from 'expo-status-bar';
 
-import {StyleSheet, Text, View, Button, TextInput } from 'react-native';
+import {StyleSheet, Text, View, TextInput } from 'react-native';
 
 import {TouchableOpacity} from 'react-native';
-import {SafeAreaView, FlatList, ListRenderItem} from 'react-native';
+import {SafeAreaView, SectionList, FlatList, ListRenderItem} from 'react-native';
 
 import { query, createRecord, initIHPBackend, initAuth} from 'ihp-backend';
 import { useQuery} from 'ihp-backend/react';
@@ -18,17 +18,20 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-import Ionicons from '@expo/vector-icons/Ionicons';
 
+//More UI Elements
+import { Button } from '@rneui/base';
+
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 import 'expo-dev-client';
 
 const ihpBackend = { host: 'https://attics.di1337.com' };
 
-
 // Some mock data to put in the navigation skeleton.
 const performancesData = [
-    {
+    { year: "1966",
+      data: [{
         id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
         title: 'First Item',
         date: '1966-05-19',
@@ -45,7 +48,16 @@ const performancesData = [
         title: 'Third Item',
         date: '1966-11-11',
         venue: 'Fillmore Auditorium'
-    }];
+    }]
+    },
+    {year:"1967",
+     data: [{
+        id: 'bd7acbea-c2b2-46c2-aed5-3ad53abb28ba',
+        title: 'First Item',
+        date: '1967-03-18',
+        venue: 'Winterland Arena'
+     }]}
+];
 
 
 const recordingsData = [
@@ -53,29 +65,48 @@ const recordingsData = [
         id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
         performance_id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
         archive_downloads: 5432,
-        avg_rating: 3.5
+        avg_rating: 3.5,
+        reviews : 51,
+        transferer: 'lestatkatt@aol.com'
     },
     {
-        id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
+        id: '58694a0f-3da1-471f-bd96-145571e29d72',
         performance_id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
         archive_downloads: 10000,
-        avg_rating: 4.5
+        avg_rating: 4.5,
+        reviews: 3.5,
+        transferer: 'Charlie Miller'
     }
 ];
-
 
 const songsData = [
     {
         id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
         recording_id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
         title: "Help On The Way",
+        length: "10:14",
         track: 1
     },
     {
         id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
         recording_id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
         title: "Slipknot!",
+        length: "7:14",
         track: 2
+    },
+    {
+        id: 'bd7acbec-c1b1-46c2-aed5-3ad53abb28ba',
+        recording_id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
+        title: "Trucking",
+        length: "5:14",
+        track: 3
+    },
+    {
+        id: 'ad7acbec-c1b1-46c2-aed5-3ad53abb28ba',
+        recording_id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
+        title: "Me and My Uncle",
+        length: "04:14",
+        track: 4
     }
     ];
 
@@ -121,26 +152,39 @@ export default function App() {
 
     return (
         <NavigationContainer>
-            <Tab.Navigator>
-              <Tab.Screen name="Browse" component={PerformanceStackScreen} />
-              <Tab.Screen name="My Shows" component={Bands} />
-              <Tab.Screen name="More" component={Bands} />
+            <Tab.Navigator   screenOptions={{headerShown: false}}>
+            <Tab.Screen name="Browse" options={BrowseIcon} component={PerformanceStackScreen} />
+            <Tab.Screen name="My Shows" options={HeartIcon} component={Bands} />
+            <Tab.Screen name="More" options={EllipsisIcon} component={Bands} />
             </Tab.Navigator>
         </NavigationContainer>
   );
 }
 
+
+const BrowseIcon = {tabBarIcon: () => {return (<Ionicons name="musical-note" size={32} color="grey" />)}}
+const HeartIcon = {tabBarIcon: () => {return (<Ionicons name="heart" size={32} color="grey" />)}}
+const EllipsisIcon = {tabBarIcon: (props) => {return (<Ionicons name="ellipsis-horizontal" size={32} color={props.isFocused? "#33448cff":"grey"} />)}}
+
+const EmptyStarIcon = {tabBarIcon: () => {return (<Ionicons name="star" size={32} color="grey" />)}}
+const HalfEmptyStarIcon = {tabBarIcon: () => {return (<Ionicons name="star" size={32} color="#FF9500" />)}}
+const DarkStarIcon = {tabBarIcon: () => {return (<Ionicons name="star" size={32} color="#FF9500" />)}}
+
+
+
 function PerformanceStackScreen() {
     return (
-        <PerformanceStack.Navigator>
+        <PerformanceStack.Navigator  screenOptions ={{headerStyle: {backgroundColor: "#33448cff"},
+                                                      headerTintColor : 'white'
+                                                     }}>
             <PerformanceStack.Screen name="Performances" component={Performances}
                 options={{
-                    headerTitle: props => <Text> Grateful Dead </Text>,
+                    headerTitle: props => <Text style={[{marginBottom:12, marginTop:60, color:'white', fontSize:32, fontWeight:'700'}]}> Grateful Dead </Text>,
                     headerRight: () => (
                         <Button
-                        onPress={() => alert('Not changing it!')}
-                        title="Change Band"
-                        color="#000"
+                         onPress={() => alert('Not changing it!')}
+                         title="Change Band"
+                         buttonStyle={{backgroundColor:'#33448cff'}}
                             />
                     ),
                 }}
@@ -151,21 +195,24 @@ function PerformanceStackScreen() {
     );
 };
 
-
 function onPress() {return;};
 
 function MoreStuff ()
- {  <View>
-
+   {<View>
+    <Text> Tips and things. </Text>
     </View>
     }
 
-function Performances ({ navigation }) {
-    const [selectedPerformanceId, setSelectedPerformanceId] = useState('');
-    // const renderPerformance : ListRenderItem<Performance> = ({item}:{item: {id:string; title:string; date:string;}}) => (
+//return  [...Array(5)].map((x, i) => <Ionicons name="star" size={32} color="#FF9500" key={i}/>)
 
+const starElements =  [...Array(5)].map((x, i) => <Ionicons name="star" size={20} color="#FF9500" key={i}/>)
+
+function Performances ({ navigation }) {
     const renderPerformance = ({ item }: { item: { id: string; title: string; date: string; venue: string; } }) => (
         <TouchableOpacity onPress={() => navigation.navigate('Recordings')} style={[styles.show_container]}>
+            <View style={[styles.ratings]}>
+              {starElements}
+            </View>
             <Text style={styles.date}> {item.date} </Text>
             <Text style={styles.venue}> {item.venue} </Text>
         </TouchableOpacity>
@@ -173,23 +220,37 @@ function Performances ({ navigation }) {
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text> Hello, Eyes of the World </Text>
-            <FlatList data={performancesData}
-                renderItem={renderPerformance}
-                keyExtractor={item => item.id}
-                horizontal={true}
+            <SectionList sections={performancesData}
+                         stickySectionHeadersEnabled={false}
+                         keyExtractor={(item, index) => item.id + index}
+        renderSectionHeader={({ section }) => (
+            <>
+                <View style={{flexDirection:'row', justifyContent:'space-between'}}>
+                <Text style={styles.header}> {section.year} </Text>
+                <Text style={{color:'white'}}> See All </Text>
+                </View>
+                <FlatList data={section.data}
+                  renderItem={renderPerformance}
+                  keyExtractor={item => item.id}
+                  horizontal={true}
+                />
+                </>
+                         )}
+                renderItem={()=>{return null;}}
+                horizontal={false}
             />
         </SafeAreaView>
     );
 };
 
 
-
 function Recordings ({ navigation }){
     const renderRecording = ({ item }) => (
-        <TouchableOpacity onPress={() => navigation.navigate('Recording')} style={[styles.show_container]}>
-            <Text style={styles.date}> {item.date}</Text>
-            <Text style={styles.venue}> {item.venue}</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Recording')} style={[styles.recording_container]}>
+            <View style={{flexDirection:"row-reverse"}}>
+              {starElements}
+            </View>
+            <Text style={styles.date}> {item.transferer}</Text>
         </TouchableOpacity>);
 
     return (
@@ -203,46 +264,63 @@ function Recordings ({ navigation }){
 };
 
 
-
 function Recording ({ navigation }) {
     const playSong = () => {return;}
 
     const renderSong = ({ item }) => (
-        <TouchableOpacity onPress={playSong} style={[styles.show_container]}>
-            <Text style={styles.date}> {item.track} </Text>
-            <Text style={styles.venue}> {item.title} </Text>
+        <TouchableOpacity onPress={playSong} style={[styles.track_listing]}>
+            <View style={styles.tracks}>
+            <View style={{flexDirection:'row'}}>
+            <Text style={styles.index}> {item.track} </Text>
+            <Text style={styles.track}> {item.title} </Text>
+            </View>
+            <Text style={styles.timing}> {item.length} </Text>
+            </View>
         </TouchableOpacity>);
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text> Grateful Dead </Text>
-            <Text> Live At Fillmore East </Text>
-            <View>
-            <Text>
-            <FavouriteButton />
-            <DownloadButton />
-            </Text>
+            <View style={{ marginTop:30, marginBottom:30}}>
+            <Text style={{ color:'white', fontSize: 32, fontWeight: '700' }} > Grateful Dead </Text>
+            <Text style={{ color:'white', fontSize: 24, fontWeight: '600' }} >  Live At Fillmore East </Text>
+              <Text style={{ color:'white', fontSize: 24, fontWeight: '600' }} >  1971-04-29 </Text>
             </View>
+
+            <View style={{flexDirection:'row', marginBottom:30}}>
+                <FavouriteButton />
+                <DownloadButton />
+            </View>
+
             <FlatList data={songsData}
                 renderItem={renderSong}
-                keyExtractor={item => item.id} />
+                keyExtractor={item => item.id}/>
         </SafeAreaView>
     )
 };
 
+const HeartOutlineIcon = (color="red") => {return <Ionicons name="heart-outline" size={32} color={color}/>}
+const DownloadIcon = () => {return <Ionicons name="download" size={32} color="#33448cff" />}
 
 const FavouriteButton = () => {
+    const [isToggled, setToggleFavourite] = useState(false)
     return (
-        <View>
-            <Button onPress={onPress} title="Favourite" />
-        </View>)
+        <Button onPress={()=> {setToggleFavourite(!isToggled); return;}}
+                buttonStyle={{borderColor:"red"}}
+        titleStyle={isToggled ? {color:"white"} : {color:"red"}}
+                containerStyle={{marginRight:30}}
+                type="outline"
+                title={isToggled? "Unfavourite":"Favourite"}
+                icon={<HeartOutlineIcon {...isToggled? "red":"white"}/>} />
+        )
 };
 
 const DownloadButton = () => {
     return (
-        <View>
-            <Button onPress={onPress} title="Download" />
-        </View>)
+        <Button onPress={onPress}
+        type="outline"
+        title="Download"
+        icon={<DownloadIcon/>} />
+    )
 };
 
 function Bands() {
@@ -301,6 +379,16 @@ const styles = StyleSheet.create({
         color: 'grey',
         fontSize: 14
     },
+    button: {
+        color:"33448cff",
+        backgroundColor:"black",
+        margin:4
+    },
+    header:{
+        color: 'white',
+        fontSize: 32,
+        fontWeight: "bold"
+    },
     date: {
         color: 'white',
         fontSize: 18,
@@ -310,9 +398,47 @@ const styles = StyleSheet.create({
         backgroundColor: '#33448cff',
         color: 'white',
         width: 120,
-        height: 160,
+        height: 140,
         margin: 4,
         borderRadius: 5
+    },
+    recording_container: {
+        backgroundColor: '#33448cff',
+        color: 'white',
+        height: 120,
+        width: 260,
+        padding:20,
+        margin: 4,
+        borderRadius: 5
+    },
+    tracks:{
+        width:380,
+        justifyContent:"space-between",
+        flexDirection:'row',
+    },
+    track:{
+        color: 'white',
+        fontSize: 18,
+        fontWeight: "bold"
+    },
+    index : {
+        color: 'grey',
+        fontSize: 14
+    },
+    timing : {
+        color: 'grey',
+        fontSize: 14
+    },
+    track_listing: {
+        backgroundColor: 'black',
+        color: 'white',
+        height: 40
+    },
+    ratings: {
+        marginLeft:4,
+        marginTop:10,
+        paddingBottom:40,
+        flexDirection:'row'
     },
     input: {
         height: 40,
@@ -320,7 +446,7 @@ const styles = StyleSheet.create({
         margin: 12,
         borderWidth: 1,
         padding: 10,
-    },
+    }
 });
 
 function getUrlParameter(url: string, name: string) {
