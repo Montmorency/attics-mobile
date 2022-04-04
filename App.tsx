@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react';
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
 
+import * as Linking from 'expo-linking';
 
 //Naviation
 import { NavigationContainer } from '@react-navigation/native';
@@ -81,7 +82,7 @@ const recordingsData = [
 
 const songsData = [
     {
-        id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
+        id: 'bd7fcbea-c1b1-46c2-aed5-3ad53abb28ba',
         recording_id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
         title: "Help On The Way",
         length: "10:14",
@@ -95,14 +96,14 @@ const songsData = [
         track: 2
     },
     {
-        id: 'bd7acbec-c1b1-46c2-aed5-3ad53abb28ba',
+        id: 'bd7gebec-c1b1-46c2-aed5-3ad53abb28ba',
         recording_id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
         title: "Trucking",
         length: "5:14",
         track: 3
     },
     {
-        id: 'ad7acbec-c1b1-46c2-aed5-3ad53abb28ba',
+        id: 'ad7klbec-c1b1-46c2-aed5-3ad53abb28ba',
         recording_id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
         title: "Me and My Uncle",
         length: "04:14",
@@ -134,7 +135,7 @@ export default function App() {
 // SecureStore.setItemAsync('ihp_jwt', jwt);
 
             window.localStorage = {
-                getItem: (key) => {
+                getItem: (key:string) => {
                     if (key === 'ihp_jwt') {
                         return jwt;
                     }
@@ -144,7 +145,7 @@ export default function App() {
                 }
             };
             await initAuth();
-            setLoggedIn(true);
+//            setLoggedIn(true);
         }
         };
         fetchJWT();
@@ -155,7 +156,7 @@ export default function App() {
             <Tab.Navigator   screenOptions={{headerShown: false}}>
             <Tab.Screen name="Browse" options={BrowseIcon} component={PerformanceStackScreen} />
             <Tab.Screen name="My Shows" options={HeartIcon} component={Bands} />
-            <Tab.Screen name="More" options={EllipsisIcon} component={Bands} />
+            <Tab.Screen name="More" options={EllipsisIcon} component={MoreInfo} />
             </Tab.Navigator>
         </NavigationContainer>
   );
@@ -283,7 +284,7 @@ function Recording ({ navigation }) {
             <View style={{ marginTop:30, marginBottom:30}}>
             <Text style={{ color:'white', fontSize: 32, fontWeight: '700' }} > Grateful Dead </Text>
             <Text style={{ color:'white', fontSize: 24, fontWeight: '600' }} >  Live At Fillmore East </Text>
-              <Text style={{ color:'white', fontSize: 24, fontWeight: '600' }} >  1971-04-29 </Text>
+            <Text style={{ color:'white', fontSize: 24, fontWeight: '600' }} >  1971-04-29 </Text>
             </View>
 
             <View style={{flexDirection:'row', marginBottom:30}}>
@@ -298,29 +299,34 @@ function Recording ({ navigation }) {
     )
 };
 
-const HeartOutlineIcon = (color="red") => {return <Ionicons name="heart-outline" size={32} color={color}/>}
+const heartOutlineIcon = () => {return <Ionicons name="heart-outline" size={32} color="red"/>}
+const heartFilledIcon = () => {return <Ionicons name="heart" size={32} color="white"/>}
 const DownloadIcon = () => {return <Ionicons name="download" size={32} color="#33448cff" />}
 
 const FavouriteButton = () => {
     const [isToggled, setToggleFavourite] = useState(false)
     return (
         <Button onPress={()=> {setToggleFavourite(!isToggled); return;}}
-                buttonStyle={{borderColor:"red"}}
+        buttonStyle={{borderColor:"red", backgroundColor: isToggled? "red":"black" }}
         titleStyle={isToggled ? {color:"white"} : {color:"red"}}
-                containerStyle={{marginRight:30}}
-                type="outline"
-                title={isToggled? "Unfavourite":"Favourite"}
-                icon={<HeartOutlineIcon {...isToggled? "red":"white"}/>} />
-        )
+        containerStyle={{marginRight:30}}
+        type="outline"
+        title={isToggled? "Unfavourite":"Favourite"}
+        icon={isToggled? heartFilledIcon():heartOutlineIcon()}/>
+    )
 };
 
 const DownloadButton = () => {
+    const [isToggled, setToggleDownload] = useState(false)
     return (
-        <Button onPress={onPress}
+        <Button onPress={()=> {setToggleDownload(!isToggled); return;}}
+        titleStyle={isToggled ? {color:"white"} : {color:"#33448cff"}}
+        buttonStyle={{backgroundColor: isToggled? "green":"black" }}
         type="outline"
-        title="Download"
+        title={isToggled ? "Downloaded":"Download"}
         icon={<DownloadIcon/>} />
     )
+
 };
 
 function Bands() {
@@ -334,6 +340,99 @@ function Bands() {
         </View>)
 }
 
+
+const greenButton = (title:string) => {
+    return (
+        <Button onPress={()=> {return;}}
+        titleStyle={{color:"white"}}
+        buttonStyle={{backgroundColor: "green" }}
+        type="outline"
+        title={title}/>
+    )
+};
+
+
+const dangerButton = (title:string) => {
+    return (
+              <Button onPress={()=> {return;}}
+        titleStyle={{color:"red"}}
+        buttonStyle={{backgroundColor: "black" }}
+        type="outline"
+        title={title}/>
+    )
+};
+
+const infoButton = (title:string) => {
+    return (
+              <Button onPress={()=> {return;}}
+        titleStyle={{color:"orange"}}
+        buttonStyle={{backgroundColor: "black" }}
+        type="outline"
+        title={title}/>
+    )
+};
+
+function MoreInfo(){
+    return(
+        <SafeAreaView style={styles.container}>
+            <View>
+
+            <Text style={styles.info}>
+            Version 1.5
+        </Text>
+
+            <Text style={styles.info}>
+            Developed by Zachary Wood
+        </Text>
+
+            <Text style={styles.info}>
+            Developed by Zachary Wood
+        </Text>
+
+            <Text style={styles.info}>
+            Leave a review on the App Store!
+        </Text>
+
+            <Text style={styles.info}>
+            See the source code on GitHub
+        </Text>
+
+            <Text style={styles.info}>
+            Suggestions? Send me a message
+        </Text>
+
+            <Text style={styles.info}>
+            View last update popup
+        </Text>
+
+            <Text style={styles.info}>
+            Live Music Archive streaming policy
+        </Text>
+
+            {dangerButton("Delete all downloads")}
+            {infoButton("Migrate from v. 4")}
+
+            <Text style={styles.info}>
+            Attics is proudly powered by the Internet Archive's Live
+            Music Archive. Please consider supporting their awesome work with a
+            donation!
+            </Text>
+
+            {greenButton ("Donate to archive.org")}
+
+            <Text style={styles.info}>
+        Running Attics's servers has monthly costs for me as well. To support me and
+        future development work on Attics, feel free to leave a tip below, review the app, or just send a nice message.
+            </Text>
+
+            {greenButton ("Zac's Tip Jar")}
+
+
+            </View>
+        </SafeAreaView>
+    )
+
+}
 
 interface BandProps {
     band: Band;
@@ -372,12 +471,17 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: 'black',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'center'
     },
     show: { color: 'white' },
     venue: {
         color: 'grey',
         fontSize: 14
+    },
+    info : {
+        color:'white',
+        fontSize: 18,
+        fontWeight: '600'
     },
     button: {
         color:"33448cff",
