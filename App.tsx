@@ -341,9 +341,9 @@ function Bands() {
 }
 
 
-const greenButton = (title:string) => {
+const greenButton = (title:string, url:string) => {
     return (
-        <Button onPress={()=> {return;}}
+        <Button onPress={()=>WebBrowser.openBrowserAsync(url)}
         titleStyle={{color:"white"}}
         buttonStyle={{backgroundColor: "green" }}
         type="outline"
@@ -354,7 +354,7 @@ const greenButton = (title:string) => {
 
 const dangerButton = (title:string) => {
     return (
-              <Button onPress={()=> {return;}}
+        <Button
         titleStyle={{color:"red"}}
         buttonStyle={{backgroundColor: "black" }}
         type="outline"
@@ -376,38 +376,40 @@ function MoreInfo(){
     return(
         <SafeAreaView style={styles.container}>
             <View>
-
             <Text style={styles.info}>
             Version 1.5
-        </Text>
+            </Text>
 
             <Text style={styles.info}>
             Developed by Zachary Wood
-        </Text>
-
-            <Text style={styles.info}>
-            Developed by Zachary Wood
-        </Text>
+            </Text>
 
             <Text style={styles.info}>
             Leave a review on the App Store!
-        </Text>
+            </Text>
 
-            <Text style={styles.info}>
-            See the source code on GitHub
-        </Text>
+            <Button
+              onPress={() => WebBrowser.openBrowserAsync("https://github.com/zacwood9/Attics")}
+              title="See the source code on GitHub"
+            />
 
-            <Text style={styles.info}>
-            Suggestions? Send me a message
-        </Text>
+            <Button
+               onPress={()=> WebBrowser.openBrowserAsync("mailto:zac.wood@hey.com")}
+               title="Suggestions? Send me a message"
+            />
 
             <Text style={styles.info}>
             View last update popup
-        </Text>
+            </Text>
 
-            <Text style={styles.info}>
-            Live Music Archive streaming policy
-        </Text>
+            <Button
+               onPress={()=> WebBrowser.openBrowserAsync("mailto:zac.wood@hey.com")}
+        title="Suggestions? Send me a message"/>
+
+            <Button
+        title="Live Music Archive streaming policy"
+        onPress= {()=> WebBrowser.openBrowserAsync("https://help.archive.org/help/the-grateful-dead-collection/")}
+            />
 
             {dangerButton("Delete all downloads")}
             {infoButton("Migrate from v. 4")}
@@ -418,14 +420,14 @@ function MoreInfo(){
             donation!
             </Text>
 
-            {greenButton ("Donate to archive.org")}
+            {greenButton ("Donate to archive.org", "https://archive.org/donate/")}
 
             <Text style={styles.info}>
         Running Attics's servers has monthly costs for me as well. To support me and
         future development work on Attics, feel free to leave a tip below, review the app, or just send a nice message.
             </Text>
 
-            {greenButton ("Zac's Tip Jar")}
+        {greenButton ("Zac's Tip Jar", "https://paypal.me/atticstipjar")}
 
 
             </View>

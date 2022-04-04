@@ -10,7 +10,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "scheme":"app",
+    "scheme":"attics",
     "updates": {
       "enabled": true,
       "fallbackToCacheTimeout": 0
