@@ -85,21 +85,21 @@ const bandsData = [
         id: 'abd7fcbea-c1b1-46c2-aed5-3ad53abb28ba',
         name: 'Bela Fleck and the Flecktones',
         num_shows: 450,
-        num_recordsings: 526,
+        num_recordings: 526,
         img: 'img_url'
     },
     {
         id: 'bd7fcbea-c1b1-46c2-aed5-3ad53abb28ba',
         name: 'Bob Weir',
         num_shows: 183,
-        num_recordsings: 273,
+        num_recordings: 273,
         img: 'img_url'
     },
     {
         id: 'cd7fcbea-c1b1-46c2-aed5-3ad53abb28ba',
         name: 'Grateful Dead',
         num_shows: 2100,
-        num_recordsings: 15641,
+        num_recordings: 15641,
         img: 'img_url'
     }
 ]
@@ -250,7 +250,13 @@ function Performances ({ navigation }) {
         </TouchableOpacity>
     );
 
+    const renderBand = ({ item }: { item: { id: string; name: string; num_shows: number; num_recordings: number; }}) => (
+        <TouchableOpacity onPress={() => navigation.navigate('Performances',{performanceId: item.id})} style={[styles.show_container]}>
+            <Text style={styles.date}> {item.num_shows} shows, {item.num_recordings} recordings</Text>
+        </TouchableOpacity>
+    );
 
+    const [searchText, onChangeText] = useState("Search");
     return (
         <SafeAreaView style={styles.container}>
             <BandContext.Consumer>
@@ -263,9 +269,14 @@ function Performances ({ navigation }) {
                             value['setModalVisible'](!value['modalVisible']);
                         }}>
 
-                        <View>
-                            <Text> Grateful Dead </Text>
-                        </View>
+                    <View style={styles.container_header}>
+                    <Text style={{color:'white', fontSize:32, marginTop:60, fontWeight:'700'}}> Bands </Text>
+                    <TextInput
+                 style={{color:'white', marginRight:16, marginLeft:16}}
+                 placeholder={searchText}
+                 inlineImageLeft='search_icon'/>
+
+                    </View>
 
                     </Modal>
                 }
@@ -501,7 +512,6 @@ function Band({ band }: BandProps) {
     return <View><Text>{band.name}</Text></View>
 }
 
-
 function NewBandButton() {
     const [name, setName] = useState('');
     const [collection, setCollection] = useState('');
@@ -560,6 +570,13 @@ const styles = StyleSheet.create({
     link_buttons : {
         marginTop : 8,
         marginBottom : 8
+    },
+    container_header: {
+        backgroundColor: '#33448cff',
+        color: 'white',
+        height: 140,
+        margin: 4,
+        borderRadius: 5
     },
     show_container: {
         backgroundColor: '#33448cff',
