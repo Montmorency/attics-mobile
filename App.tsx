@@ -3,11 +3,11 @@ import { StatusBar } from 'expo-status-bar';
 import {StyleSheet, Text, View, TextInput } from 'react-native';
 
 import {TouchableOpacity} from 'react-native';
-import {SafeAreaView, SectionList, FlatList, ListRenderItem} from 'react-native';
+import {SafeAreaView, SectionList, FlatList, Modal} from 'react-native';
 
 import { query, createRecord, initIHPBackend, initAuth} from 'ihp-backend';
 import { useQuery} from 'ihp-backend/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, createContext } from 'react';
 
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
@@ -79,6 +79,30 @@ const recordingsData = [
         transferer: 'Charlie Miller'
     }
 ];
+
+const bandsData = [
+    {
+        id: 'abd7fcbea-c1b1-46c2-aed5-3ad53abb28ba',
+        name: 'Bela Fleck and the Flecktones',
+        num_shows: 450,
+        num_recordsings: 526,
+        img: 'img_url'
+    },
+    {
+        id: 'bd7fcbea-c1b1-46c2-aed5-3ad53abb28ba',
+        name: 'Bob Weir',
+        num_shows: 183,
+        num_recordsings: 273,
+        img: 'img_url'
+    },
+    {
+        id: 'cd7fcbea-c1b1-46c2-aed5-3ad53abb28ba',
+        name: 'Grateful Dead',
+        num_shows: 2100,
+        num_recordsings: 15641,
+        img: 'img_url'
+    }
+]
 
 const songsData = [
     {
@@ -172,18 +196,23 @@ const HalfEmptyStarIcon = {tabBarIcon: () => {return (<Ionicons name="star" size
 const DarkStarIcon = {tabBarIcon: () => {return (<Ionicons name="star" size={32} color="#FF9500" />)}}
 
 
+const BandContext = createContext({'modalVisible':false, 'setModalVisible':undefined})
 
 function PerformanceStackScreen() {
+    const [modalVisible, setModalVisible] = useState(false);
+
     return (
+        <BandContext.Provider value={{'modalVisible':modalVisible, 'setModalVisible':setModalVisible}}>
         <PerformanceStack.Navigator  screenOptions ={{headerStyle: {backgroundColor: "#33448cff"},
                                                       headerTintColor : 'white'
                                                      }}>
+
             <PerformanceStack.Screen name="Performances" component={Performances}
                 options={{
                     headerTitle: props => <Text style={[{marginBottom:12, marginTop:60, color:'white', fontSize:32, fontWeight:'700'}]}> Grateful Dead </Text>,
                     headerRight: () => (
                         <Button
-                         onPress={() => alert('Not changing it!')}
+                        onPress={() => setModalVisible(!modalVisible)}
                          title="Change Band"
                          buttonStyle={{backgroundColor:'#33448cff'}}
                             />
@@ -192,7 +221,8 @@ function PerformanceStackScreen() {
             />
             <PerformanceStack.Screen name="Recordings" component={Recordings}/>
             <PerformanceStack.Screen name="Recording" component={Recording}/>
-        </PerformanceStack.Navigator>
+            </PerformanceStack.Navigator>
+         </BandContext.Provider>
     );
 };
 
@@ -208,9 +238,10 @@ function MoreStuff ()
 
 const starElements =  [...Array(5)].map((x, i) => <Ionicons name="star" size={20} color="#FF9500" key={i}/>)
 
+
 function Performances ({ navigation }) {
     const renderPerformance = ({ item }: { item: { id: string; title: string; date: string; venue: string; } }) => (
-        <TouchableOpacity onPress={() => navigation.navigate('Recordings')} style={[styles.show_container]}>
+        <TouchableOpacity onPress={() => navigation.navigate('Recordings',{performanceId: item.id})} style={[styles.show_container]}>
             <View style={[styles.ratings]}>
               {starElements}
             </View>
@@ -219,8 +250,26 @@ function Performances ({ navigation }) {
         </TouchableOpacity>
     );
 
+
     return (
         <SafeAreaView style={styles.container}>
+            <BandContext.Consumer>
+                {(value) =>
+                    <Modal
+                        animationType="slide"
+                        transparent={false}
+                        visible={value['modalVisible']}
+                        onRequestClose={() => {
+                            value['setModalVisible'](!value['modalVisible']);
+                        }}>
+
+                        <View>
+                            <Text> Grateful Dead </Text>
+                        </View>
+
+                    </Modal>
+                }
+            </BandContext.Consumer>
             <SectionList sections={performancesData}
                          stickySectionHeadersEnabled={false}
                          keyExtractor={(item, index) => item.id + index}
@@ -245,9 +294,9 @@ function Performances ({ navigation }) {
 };
 
 
-function Recordings ({ navigation }){
+function Recordings ({route, navigation }){
     const renderRecording = ({ item }) => (
-        <TouchableOpacity onPress={() => navigation.navigate('Recording')} style={[styles.recording_container]}>
+        <TouchableOpacity onPress={() => navigation.navigate('Recording', {recordingId: item.id})} style={[styles.recording_container]}>
             <View style={{flexDirection:"row-reverse"}}>
               {starElements}
             </View>
@@ -265,7 +314,7 @@ function Recordings ({ navigation }){
 };
 
 
-function Recording ({ navigation }) {
+function Recording ({ route, navigation }) {
     const playSong = () => {return;}
 
     const renderSong = ({ item }) => (
@@ -288,7 +337,7 @@ function Recording ({ navigation }) {
             </View>
 
             <View style={{flexDirection:'row', marginBottom:30}}>
-                <FavouriteButton />
+                <FavouriteButton recordingId={route.params.recordingId}/>
                 <DownloadButton />
             </View>
 
@@ -303,10 +352,14 @@ const heartOutlineIcon = () => {return <Ionicons name="heart-outline" size={32} 
 const heartFilledIcon = () => {return <Ionicons name="heart" size={32} color="white"/>}
 const DownloadIcon = () => {return <Ionicons name="download" size={32} color="#33448cff" />}
 
-const FavouriteButton = () => {
+//const FavouriteButton = () => {
+function FavouriteButton(props) {
     const [isToggled, setToggleFavourite] = useState(false)
     return (
-        <Button onPress={()=> {setToggleFavourite(!isToggled); return;}}
+        <Button onPress={()=> {setToggleFavourite(!isToggled);
+                               //add props.recordingId to My Shows Async.
+                               return;}
+                        }
         buttonStyle={{borderColor:"red", backgroundColor: isToggled? "red":"black" }}
         titleStyle={isToggled ? {color:"white"} : {color:"red"}}
         containerStyle={{marginRight:30}}
@@ -389,13 +442,15 @@ function MoreInfo(){
             </Text>
 
             <Button
-              onPress={() => WebBrowser.openBrowserAsync("https://github.com/zacwood9/Attics")}
-              title="See the source code on GitHub"
+        containerStyle={styles.link_buttons}
+        onPress={() => WebBrowser.openBrowserAsync("https://github.com/zacwood9/Attics")}
+        title="See the source code on GitHub"
             />
 
             <Button
-               onPress={()=> WebBrowser.openBrowserAsync("mailto:zac.wood@hey.com")}
-               title="Suggestions? Send me a message"
+        containerStyle={styles.link_buttons}
+        onPress={()=> WebBrowser.openBrowserAsync("mailto:zac.wood@hey.com")}
+        title="Suggestions? Send me a message"
             />
 
             <Text style={styles.info}>
@@ -403,10 +458,12 @@ function MoreInfo(){
             </Text>
 
             <Button
-               onPress={()=> WebBrowser.openBrowserAsync("mailto:zac.wood@hey.com")}
+        containerStyle={styles.link_buttons}
+        onPress={()=> WebBrowser.openBrowserAsync("mailto:zac.wood@hey.com")}
         title="Suggestions? Send me a message"/>
 
             <Button
+        containerStyle={styles.link_buttons}
         title="Live Music Archive streaming policy"
         onPress= {()=> WebBrowser.openBrowserAsync("https://help.archive.org/help/the-grateful-dead-collection/")}
             />
@@ -499,6 +556,10 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 18,
         fontWeight: "bold"
+    },
+    link_buttons : {
+        marginTop : 8,
+        marginBottom : 8
     },
     show_container: {
         backgroundColor: '#33448cff',
