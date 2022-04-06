@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 
 import {StyleSheet, Text, View, TextInput } from 'react-native';
 
-import {TouchableOpacity} from 'react-native';
+import {Pressable, TouchableOpacity} from 'react-native';
 import {SafeAreaView, SectionList, FlatList, Modal} from 'react-native';
 
 import { query, createRecord, initIHPBackend, initAuth} from 'ihp-backend';
@@ -28,6 +28,11 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import 'expo-dev-client';
 
 const ihpBackend = { host: 'https://attics.di1337.com' };
+
+//Context
+const BandContext = createContext({'modalVisible':false, 'setModalVisible':undefined, 'currentBandId':''})
+const MyShowsContext = createContext(new Map());
+
 
 // Some mock data to put in the navigation skeleton.
 const performancesData = [
@@ -79,6 +84,19 @@ const recordingsData = [
         transferer: 'Charlie Miller'
     }
 ];
+
+const myShowsData = [{
+        id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
+        title: 'First Item',
+        date: '1966-05-19',
+        venue: 'Avalon Ballroom'
+    },
+    {
+        id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
+        title: 'Second Item',
+        date: '1966-06-19',
+        venue: 'Ivar Theater'
+    }]
 
 const bandsData = [
     {
@@ -141,6 +159,8 @@ const songsData = [
 initIHPBackend(ihpBackend);
 
 const PerformanceStack = createNativeStackNavigator();
+const MyShowsStack = createNativeStackNavigator();
+
 const Tab = createBottomTabNavigator();
 
 
@@ -179,7 +199,7 @@ export default function App() {
         <NavigationContainer>
             <Tab.Navigator   screenOptions={{headerShown: false}}>
             <Tab.Screen name="Browse" options={BrowseIcon} component={PerformanceStackScreen} />
-            <Tab.Screen name="My Shows" options={HeartIcon} component={Bands} />
+            <Tab.Screen name="My Shows" options={HeartIcon} component={MyShowsStackScreen} />
             <Tab.Screen name="More" options={EllipsisIcon} component={MoreInfo} />
             </Tab.Navigator>
         </NavigationContainer>
@@ -195,8 +215,17 @@ const EmptyStarIcon = {tabBarIcon: () => {return (<Ionicons name="star" size={32
 const HalfEmptyStarIcon = {tabBarIcon: () => {return (<Ionicons name="star" size={32} color="#FF9500" />)}}
 const DarkStarIcon = {tabBarIcon: () => {return (<Ionicons name="star" size={32} color="#FF9500" />)}}
 
+function MyShowsStackScreen()
+{
+    return (
+        <MyShowsStack.Navigator  screenOptions ={{headerStyle: {backgroundColor: "#33448cff"},
+                                                  headerTintColor : 'white'
+                                                 }}>
+            <MyShowsStack.Screen name="My Shows" component={MyShows}/>
+            <MyShowsStack.Screen name="Recording" component={Recording}/>
+        </MyShowsStack.Navigator>)
+}
 
-const BandContext = createContext({'modalVisible':false, 'setModalVisible':undefined})
 
 function PerformanceStackScreen() {
     const [modalVisible, setModalVisible] = useState(false);
@@ -221,25 +250,93 @@ function PerformanceStackScreen() {
             />
             <PerformanceStack.Screen name="Recordings" component={Recordings}/>
             <PerformanceStack.Screen name="Recording" component={Recording}/>
+            <PerformanceStack.Screen name="PerformancesByYear" component={YearsPerformances}/>
             </PerformanceStack.Navigator>
          </BandContext.Provider>
     );
 };
 
-function onPress() {return;};
+function onPress() { return; };
 
-function MoreStuff ()
-   {<View>
-    <Text> Tips and things. </Text>
+function MoreStuff() {
+    <View>
+        <Text> Tips and things. </Text>
     </View>
-    }
+}
 
 //return  [...Array(5)].map((x, i) => <Ionicons name="star" size={32} color="#FF9500" key={i}/>)
 
 const starElements =  [...Array(5)].map((x, i) => <Ionicons name="star" size={20} color="#FF9500" key={i}/>)
 
 
+function selectBand (navigation,modalContext) {
+    modalContext['setModalVisible'](!modalContext['modalVisible']);
+    navigation.navigate('Performances');
+}
+
+function YearsPerformances ({ navigation }){
+
+    const renderShow = ({ item }) => (
+        <TouchableOpacity onPress={() => navigation.navigate('Recording', { recordingId: item.id })} style={[styles.yearshows_container]}>
+            <View style={[styles.ratings]}>
+                <Text style={styles.venue}> {item.venue}</Text>
+                {starElements}
+            </View>
+            <Text style={{ color: 'white', fontSize: 24, marginBottom: 8, fontWeight: "700" }}> {item.date} </Text>
+        </TouchableOpacity>
+    );
+
+
+    return (
+        <View style={{backgroundColor:'black', flex:2}}>
+            <View style={styles.container_header}>
+                <Text style={{ color: 'white', fontSize: 32, marginTop: 60, fontWeight: '700' }}> 1965 </Text>
+            </View>
+            <FlatList data={myShowsData}
+                renderItem={renderShow}
+                keyExtractor={item => item.id}
+            />
+        </View>
+    )}
+
+
+function MyShows ({ navigation }){
+    const [searchText, onChangeText] = useState("Search");
+
+    const renderShow = ({ item }) => (
+        <TouchableOpacity onPress={() => navigation.navigate('Recording', { recordingId: item.id })} style={[styles.myshows_container]}>
+            <View style={[styles.ratings]}>
+                <Text style={styles.venue}> {item.venue}</Text>
+                {starElements}
+            </View>
+            <Text style={{ color: 'white', fontSize: 24, marginBottom: 8, fontWeight: "700" }}> {item.date} </Text>
+        </TouchableOpacity>
+    );
+
+
+    return (
+        <View style={{backgroundColor:'black', flex:2}}>
+            <View style={styles.container_header}>
+                <Text style={{ color: 'white', fontSize: 32, marginTop: 60, fontWeight: '700' }}> My Shows </Text>
+                <TextInput
+                    style={styles.search_input}
+                    placeholder={searchText}
+                    clearButtonMode='while-editing'
+                    inlineImageLeft='search_icon' />
+
+            </View>
+            <FlatList data={myShowsData}
+                renderItem={renderShow}
+                keyExtractor={item => item.id}
+            />
+        </View>
+    )}
+
 function Performances ({ navigation }) {
+    const [searchText, onChangeText] = useState("Search");
+
+    //bandsData = selectiveFetch() if there have been changes to the bands data pull them across otherwise they should be cached.
+
     const renderPerformance = ({ item }: { item: { id: string; title: string; date: string; venue: string; } }) => (
         <TouchableOpacity onPress={() => navigation.navigate('Recordings',{performanceId: item.id})} style={[styles.show_container]}>
             <View style={[styles.ratings]}>
@@ -251,12 +348,16 @@ function Performances ({ navigation }) {
     );
 
     const renderBand = ({ item }: { item: { id: string; name: string; num_shows: number; num_recordings: number; }}) => (
-        <TouchableOpacity onPress={() => navigation.navigate('Performances',{performanceId: item.id})} style={[styles.show_container]}>
-            <Text style={styles.date}> {item.num_shows} shows, {item.num_recordings} recordings</Text>
-        </TouchableOpacity>
+        <BandContext.Consumer>
+            {(value) =>
+                <TouchableOpacity onPress={() => selectBand(navigation,value)} style={[styles.band_container]}>
+                <Text style={{color:'white', fontSize:24, marginBottom:8, fontWeight:"700"}}> {item.name} </Text>
+                <Text style={styles.date}> {item.num_shows} shows, {item.num_recordings} recordings</Text>
+                </TouchableOpacity>
+                }
+        </BandContext.Consumer>
     );
 
-    const [searchText, onChangeText] = useState("Search");
     return (
         <SafeAreaView style={styles.container}>
             <BandContext.Consumer>
@@ -265,39 +366,49 @@ function Performances ({ navigation }) {
                         animationType="slide"
                         transparent={false}
                         visible={value['modalVisible']}
+                        style={styles.container}
                         onRequestClose={() => {
                             value['setModalVisible'](!value['modalVisible']);
                         }}>
+                        <View style={{ backgroundColor: 'black', flex: 2 }}>
+                            <View style={styles.container_header}>
+                                <Text style={{ color: 'white', fontSize: 32, marginTop: 60, fontWeight: '700' }}> Bands </Text>
+                                <TextInput
+                                    style={styles.search_input}
+                                    placeholder={searchText}
+                                    clearButtonMode='while-editing'
+                                    inlineImageLeft='search_icon' />
 
-                    <View style={styles.container_header}>
-                    <Text style={{color:'white', fontSize:32, marginTop:60, fontWeight:'700'}}> Bands </Text>
-                    <TextInput
-                 style={{color:'white', marginRight:16, marginLeft:16}}
-                 placeholder={searchText}
-                 inlineImageLeft='search_icon'/>
-
-                    </View>
-
+                            </View>
+                            <FlatList data={bandsData}
+                                renderItem={renderBand}
+                                keyExtractor={item => item.id}
+                            />
+                        </View>
                     </Modal>
                 }
             </BandContext.Consumer>
+
             <SectionList sections={performancesData}
-                         stickySectionHeadersEnabled={false}
-                         keyExtractor={(item, index) => item.id + index}
-        renderSectionHeader={({ section }) => (
-            <>
-                <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-                <Text style={styles.header}> {section.year} </Text>
-                <Text style={{color:'white'}}> See All </Text>
-                </View>
-                <FlatList data={section.data}
-                  renderItem={renderPerformance}
-                  keyExtractor={item => item.id}
-                  horizontal={true}
-                />
-                </>
-                         )}
-                renderItem={()=>{return null;}}
+                stickySectionHeadersEnabled={false}
+                keyExtractor={(item, index) => item.id + index}
+                renderSectionHeader={({ section }) => (
+                    <>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <Text style={styles.header}> {section.year} </Text>
+                        <Pressable onPress={() => navigation.navigate("PerformancesByYear")}>
+                        <Text style={{color:'white'}}> See All </Text>
+                        </Pressable>
+
+                        </View>
+                        <FlatList data={section.data}
+                            renderItem={renderPerformance}
+                            keyExtractor={item => item.id}
+                            horizontal={true}
+                        />
+                    </>
+                )}
+                renderItem={() => { return null; }}
                 horizontal={false}
             />
         </SafeAreaView>
@@ -571,10 +682,31 @@ const styles = StyleSheet.create({
         marginTop : 8,
         marginBottom : 8
     },
+    myshows_container: {
+        backgroundColor: 'green',
+        color: 'white',
+        height: 100,
+        margin: 4,
+        borderRadius: 5
+    },
+    yearshows_container: {
+        backgroundColor: '#33448cff',
+        color: 'white',
+        height: 100,
+        margin: 4,
+        borderRadius: 5
+    },
+    band_container: {
+        backgroundColor: '#33448cff',
+        color: 'white',
+        height: 100,
+        margin: 4,
+        borderRadius: 5
+    },
     container_header: {
         backgroundColor: '#33448cff',
         color: 'white',
-        height: 140,
+        height: 180,
         margin: 4,
         borderRadius: 5
     },
@@ -621,8 +753,17 @@ const styles = StyleSheet.create({
     ratings: {
         marginLeft:4,
         marginTop:10,
-        paddingBottom:40,
+        paddingBottom:30,
         flexDirection:'row'
+    },
+    search_input : {
+        height: 40,
+        backgroundColor: '#33448c88',
+        fontSize:18,
+        color: 'white',
+        margin: 12,
+        borderWidth: 1,
+        padding: 10,
     },
     input: {
         height: 40,
